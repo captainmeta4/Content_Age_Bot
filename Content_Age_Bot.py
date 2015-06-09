@@ -89,7 +89,7 @@ class Bot():
     def process_submissions(self):
         print ("processing submissions")
 
-        for submission in r.get_subreddit("mod").get_new(limit=100):
+        for submission in r.get_subreddit("mod").get_new(limit=self.limit):
 
             #Avoid duplicate work
             if submission.id in self.already_done:
@@ -162,14 +162,14 @@ class Bot():
 
     def run(self):
         self.initialize()
+        
+        self.limit=1
 
         while 1:
             self.check_messages()
             self.process_submissions()
 
-            time.sleep(1)
-            while time.localtime().tm_sec !=0 and time.localtime().tm_sec!=30:
-                time.sleep(1)
+            self.limit=100
             
 
 if __name__=='__main__':
