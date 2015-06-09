@@ -157,6 +157,8 @@ class Bot():
                      "&subject=Question regarding the removal of this submission by /u/"+submission.author.name+
                      "&message=I have a question regarding the removal of this [submission]("+submission.permalink+") if you feel this was in error.*")
                 submission.add_comment(msg).distinguish()
+                
+                submission.set_flair(flair_text="Out of Date")
             except:
                 pass
 
