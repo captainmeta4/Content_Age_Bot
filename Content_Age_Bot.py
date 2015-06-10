@@ -102,6 +102,10 @@ class Bot():
             #ignore self_posts:
             if submission.is_self:
                 continue
+            
+            #ignore submissions that were manually approved
+            if submission.approved_by != None
+                continue
 
             #Get the submission url
             url=submission.url
