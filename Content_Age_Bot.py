@@ -104,7 +104,7 @@ class Bot():
                 continue
             
             #ignore submissions that were manually approved
-            if submission.approved_by != None
+            if submission.approved_by != None:
                 continue
 
             #Get the submission url
