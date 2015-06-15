@@ -7,12 +7,16 @@ import time
 import re
 
 #Initialize reddit
-r=praw.Reddit(user_agent="Content age enforcement bot by /u/captainmeta4")
+user_agent="Content age enforcement bot by /u/captainmeta4"
+r=praw.Reddit(user_agent=user_agent)
 username = "Content_Age_Bot"
 master_subreddit = "captainmeta4bots"
 
 #Embed.ly stuff
 embedly_key=os.environ.get('key')
+
+#requests stuff
+headers={'user_agent': user_agent}
 
 class Bot():
 
@@ -89,15 +93,13 @@ class Bot():
     def process_submissions(self):
         print ("processing submissions")
 
-        for submission in r.get_subreddit("mod").get_new(limit=self.limit):
+        for submission in r.get_subreddit("mod").get_new(limit=100):
 
             #Avoid duplicate work
             if submission.id in self.already_done:
                 continue
 
             self.already_done.append(submission.id)
-
-            print("checking "+submission.title)
 
             #ignore self_posts:
             if submission.is_self:
@@ -107,28 +109,40 @@ class Bot():
             if submission.approved_by != None:
                 continue
 
+            print("checking "+submission.title)
+
             #Get the submission url
             url=submission.url
 
-            #Create params
-            params={'url':url,'key':embedly_key}
-
-            #Hit the embed.ly API for data
-            data=requests.get('http://api.embed.ly/1/extract',params=params)
-
-            #Get content timestamp
+            #Try getting timestamp directly. If that fails, hit embed.ly
             try:
-                content_creation = data.json()['published']
+                content = requests.get(url, headers=headers)
+                timestamp = time.strptime(content.headers['Last-Modified'], '%a, %d %b %Y %H:%M:%S %Z')
+                content_creation = int(time.mktime(timestamp))
+                print('timestamp extracted')
             except:
-                continue
 
-            #Pass on content that does not have a timestamp
-            if content_creation == None:
-                continue
+                #Create params
+                params={'url':url,'key':embedly_key}
 
-            #Divide the creation timestamp by 1000 because embed.ly adds 3 extra zeros for no reason
-            content_creation = content_creation / 1000
-            
+                #Hit the embed.ly API for data
+                data=requests.get('http://api.embed.ly/1/extract',params=params, headers=headers)
+
+                #Get content timestamp
+                try:
+                    content_creation = data.json()['published']
+                    #Pass on content that does not have a timestamp
+                    if content_creation == None:
+                        print('error')
+                        continue
+                    #Divide the creation timestamp by 1000 because embed.ly adds 3 extra zeros for no reason
+                    content_creation = content_creation / 1000
+                    print('timestamp gotten via embed.ly')
+                except:
+                    print('error')
+                    continue
+
+
             #sanity check for if embedly fucks up
             if content_creation < 0:
                 continue
@@ -151,18 +165,19 @@ class Bot():
 
             #Remove the submission
             try:
-                submission.remove()
+                pass
+                #submission.remove()
             
                 #Leave a distinguished message
-                msg=("Thanks for contributing. However, your submission has been automatically removed."+
-                     "\n\nAs per the [subreddit rules](/r/"+submission.subreddit.display_name+"/about/sidebar),"+
-                     " content older than "+str(self.options[submission.subreddit.display_name.lower()])+" days is not allowed.\n\n---\n\n"+
-                     "*I am a bot. Please [Message the Mods](https://www.reddit.com/message/compose?to=/r/"+submission.subreddit.display_name+
-                     "&subject=Question regarding the removal of this submission by /u/"+submission.author.name+
-                     "&message=I have a question regarding the removal of this [submission]("+submission.permalink+") if you feel this was in error.*")
-                submission.add_comment(msg).distinguish()
+                #msg=("Thanks for contributing. However, your submission has been automatically removed."+
+                #     "\n\nAs per the [subreddit rules](/r/"+submission.subreddit.display_name+"/about/sidebar),"+
+                #     " content older than "+str(self.options[submission.subreddit.display_name.lower()])+" days is not allowed.\n\n---\n\n"+
+                #     "*I am a bot. Please [Message the Mods](https://www.reddit.com/message/compose?to=/r/"+submission.subreddit.display_name+
+                #     "&subject=Question regarding the removal of this submission by /u/"+submission.author.name+
+                #     "&message=I have a question regarding the removal of this [submission]("+submission.permalink+") if you feel this was in error.*")
+                #submission.add_comment(msg).distinguish()
                 
-                submission.set_flair(flair_text="Out of Date")
+                #submission.set_flair(flair_text="Out of Date")
             except:
                 pass
 
@@ -176,6 +191,7 @@ class Bot():
             self.process_submissions()
 
             self.limit=100
+            time.sleep(10)
             
 
 if __name__=='__main__':
