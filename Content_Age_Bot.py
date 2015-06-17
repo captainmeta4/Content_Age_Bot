@@ -40,27 +40,28 @@ class Bot():
                 continue
             
             #Assume it's a mod invite
-            try:
-                message.subreddit.accept_moderator_invite()
+            #Not accepting mod invites at this time
+            #try:
+            #    message.subreddit.accept_moderator_invite()
 
-                print('accepted mod invite for /r/'+message.subreddit.display_name)
+            #    print('accepted mod invite for /r/'+message.subreddit.display_name)
 
-                msg=("Hello, moderators of /r/"+message.subreddit.display_name+
-                     "\n\nI am a bot that checks the age of submitted content, and automatically removes content that is too old."+
-                     "\n\nBy default, my threshold is 365 days. To adjust my threshold, send me a PM with your subreddit name as the subject, and the threshold as the body"+
-                     "\n\nPlease note that I require Posts permissions for proper functionality."
-                     "\n\nFeedback may be directed to my creator, /u/captainmeta4")
+            #    msg=("Hello, moderators of /r/"+message.subreddit.display_name+
+            #         "\n\nI am a bot that checks the age of submitted content, and automatically removes content that is too old."+
+            #         "\n\nBy default, my threshold is 365 days. To adjust my threshold, send me a PM with your subreddit name as the subject, and the threshold as the body"+
+            #         "\n\nPlease note that I require Posts permissions for proper functionality."
+            #         "\n\nFeedback may be directed to my creator, /u/captainmeta4")
 
-                r.send_message(message.subreddit, "Introduction",msg)
+            #    r.send_message(message.subreddit, "Introduction",msg)
 
-                self.options[subreddit.display_name.lower()]= 365
+            #    self.options[subreddit.display_name.lower()]= 365
 
-                r.edit_wiki_page(master_subreddit,"content_age",str(self.options))
+            #    r.edit_wiki_page(master_subreddit,"content_age",str(self.options))
 
-                continue
+            #    continue
                 
-            except:
-                pass
+            #except:
+            #    pass
 
             #Now do subreddit configs
             try:
@@ -70,10 +71,14 @@ class Bot():
                 if message.author not in r.get_moderators(subredditname):
                     message.reply("You are not a moderator of that subreddit")
                     continue
-
+                
+                if r.get_subreddit(subredditname) not in r.get_my_moderation():
+                    message.reply("I am not a moderator of that subreddit. I am not accepting moderator invites at this time.")
+                    continue
+                
                 #check message body for junk
                 if re.search("^\\d{1,3}$",message.body) == None:
-                    message.reply("1There was a problem, and I wasn't able to make sense of your message. (Error code: 1)")
+                    message.reply("There was a problem, and I wasn't able to make sense of your message. (Error code: 1)")
 
                 threshold=eval(message.body)
 
@@ -187,6 +192,7 @@ class Bot():
         self.limit=1
 
         while 1:
+            
             self.check_messages()
             self.process_submissions()
 
