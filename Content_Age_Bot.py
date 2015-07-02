@@ -21,11 +21,13 @@ headers={'user_agent': user_agent}
 class Bot():
 
     def initialize(self):
+        print('logging in...')
         r.login(username,os.environ.get('password'))
+        print('logged in')
         self.already_done=deque([],maxlen=200)
-
+        print('loading options...')
         self.options=eval(r.get_wiki_page(master_subreddit,"content_age").content_md)
-
+        print('options loaded')
     def check_messages(self):
 
         print('checking messages')
@@ -195,7 +197,7 @@ class Bot():
             
             self.check_messages()
             self.process_submissions()
-
+            time.sleep(10)
             self.limit=100
             
 
