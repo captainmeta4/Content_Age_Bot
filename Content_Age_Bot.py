@@ -180,7 +180,7 @@ class Bot():
                      " content older than "+str(self.options[submission.subreddit.display_name.lower()])+" days is not allowed.\n\n---\n\n"+
                      "*I am a bot. Occasionally I make mistakes, usually due to website owners putting inaccurate metadata on their page. Please [Message the Mods](https://www.reddit.com/message/compose?to=/r/"+submission.subreddit.display_name+
                      "&subject=Question regarding the removal of this submission by /u/"+submission.author.name+
-                     "&message=I have a question regarding the removal of this [submission]("+submission.permalink+"\) if you feel this was in error.*")
+                     "&message=I have a question regarding the removal of this [submission]("+submission.permalink+"\)) if you feel this was in error.*")
                 submission.add_comment(msg).distinguish()
                 
                 submission.set_flair(flair_text="Out of Date")
