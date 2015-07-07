@@ -174,7 +174,7 @@ class Bot():
             try:
                 submission.remove()
             
-                Leave a distinguished message
+                #Leave a distinguished message
                 msg=("Thanks for contributing. However, your submission has been automatically removed."+
                      "\n\nAs per the [subreddit rules](/r/"+submission.subreddit.display_name+"/about/sidebar),"+
                      " content older than "+str(self.options[submission.subreddit.display_name.lower()])+" days is not allowed.\n\n---\n\n"+
