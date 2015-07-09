@@ -18,6 +18,11 @@ embedly_key=os.environ.get('key')
 #requests stuff
 headers={'user_agent': user_agent}
 
+#Sources that can't be fucked to put an accurate timestamp in their headers
+ignore_headers=[
+    'firstlook.org'
+]
+
 class Bot():
 
     def initialize(self):
@@ -114,6 +119,10 @@ class Bot():
             
             #ignore submissions that were manually approved
             if submission.approved_by != None:
+                continue
+            
+            #ignore domains known to be unacceptably lazy with timestamps
+            if any(domain in submission.domain for domain in ignore_headers):
                 continue
 
             print("checking "+submission.title)
